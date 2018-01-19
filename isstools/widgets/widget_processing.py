@@ -31,7 +31,7 @@ class UIProcessing(*uic.loadUiType(ui_path)):
         self.hhm = hhm
         self.db = db
         self.det_dict = det_dict
-        self.gen_parser = xasdata.XASdataGeneric(self.hhm.pulses_per_deg, self.db)
+        self.gen_parser = xasdata.XASdataGeneric(self.hhm.enc.pulses_per_deg, self.db)
 
         self.settings = QSettings('ISS Beamline', 'XLive')
         self.edit_E0_2.setText(self.settings.value('e0_processing', defaultValue='11470', type=str))
@@ -285,7 +285,7 @@ class UIProcessing(*uic.loadUiType(ui_path)):
 
         array = self.gen_parser.interp_arrays[self.last_den_text][:, 1]
         if self.last_den_text != '1':
-            det = [det for det in [det for det in self.det_dict if hasattr(det, 'dev_name')] if
+            det = [det for det in [self.det_dict[det]['obj'] for det in self.det_dict if hasattr(self.det_dict[det]['obj'], 'dev_name')] if
                    det.dev_name.value == self.last_den_text][0]
             polarity = det.polarity
             if polarity == 'neg':
@@ -609,7 +609,7 @@ class process_bin_thread_equal(QThread):
 
             array = self.gui.gen_parser.interp_arrays[self.gui.last_den_text][:, 1]
             if self.gui.last_den_text != '1':
-                det = [det for det in [det for det in self.gui.det_dict if hasattr(det, 'dev_name')] if det.dev_name.value == self.gui.last_den_text][0]
+                det = [det for det in [self.gui.det_dict[det]['obj'] for det in self.gui.det_dict if hasattr(self.gui.det_dict[det]['obj'], 'dev_name')] if det.dev_name.value == self.gui.last_den_text][0]
                 polarity = det.polarity
                 if polarity == 'neg':
                     if sum(array > 0):
